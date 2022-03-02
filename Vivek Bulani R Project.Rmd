@@ -1,0 +1,886 @@
+---
+title: "21205992 Vivek Bulani R Final Project"
+author: "Vivek Bulani 21205992"
+date: "12/20/2021"
+output: html_document
+---
+
+## STAT40620 - Data Programming with R - Final Project
+
+## VIVEK MANMOHAN BULANI - 21205992
+
+
+For this Final project, the dataset which has been used is Student Alcohol Consumption Dataset from Kaggle. It has the data which is obtained in a survey of students studying Mathematics and Portuguese language courses in secondary school.
+To limit the scope for this project, only the data of students studying mathematics has been analysed here.
+
+The different attributes/columns in the student-mat.csv (Math course) dataset is :- 
+
+1) school - student's school (binary: 'GP' - Gabriel Pereira or 'MS' - Mousinho da Silveira)
+
+2) sex - student's sex (binary: 'F' - female or 'M' - male)
+
+3) age - student's age (numeric: from 15 to 22)
+
+4) address - student's home address type (binary: 'U' - urban or 'R' - rural)
+
+5) famsize - family size (binary: 'LE3' - less or equal to 3 or 'GT3' - greater than 3)
+
+6) Pstatus - parent's cohabitation status (binary: 'T' - living together or 'A' - apart)
+
+7) Medu - mother's education (numeric: 0 - none, 1 - primary education (4th grade), 2 – 5th to 9th grade, 3 – secondary 8) education or 4 – higher education)
+
+8) Fedu - father's education (numeric: 0 - none, 1 - primary education (4th grade), 2 – 5th to 9th grade, 3 – secondary education or 4 – higher education)
+
+9) Mjob - mother's job (nominal: 'teacher', 'health' care related, civil 'services' (e.g. administrative or police), 'at_home' or 'other')
+
+10) Fjob - father's job (nominal: 'teacher', 'health' care related, civil 'services' (e.g. administrative or police), 'at_home' or 'other')
+
+11) reason - reason to choose this school (nominal: close to 'home', school 'reputation', 'course' preference or 'other')
+
+12) guardian - student's guardian (nominal: 'mother', 'father' or 'other')
+
+13) traveltime - home to school travel time (numeric: 1 - <15 min., 2 - 15 to 30 min., 3 - 30 min. to 1 hour, or 4 - >1 hour)
+
+14) studytime - weekly study time (numeric: 1 - <2 hours, 2 - 2 to 5 hours, 3 - 5 to 10 hours, or 4 - >10 hours)
+
+15) failures - number of past class failures (numeric: n if 1<=n<3, else 4)
+
+16) schoolsup - extra educational support (binary: yes or no)
+
+17) famsup - family educational support (binary: yes or no)
+
+18) paid - extra paid classes within the course subject (Math or Portuguese) (binary: yes or no)
+
+19) activities - extra-curricular activities (binary: yes or no)
+
+20) nursery - attended nursery school (binary: yes or no)
+
+21) higher - wants to take higher education (binary: yes or no)
+
+22) internet - Internet access at home (binary: yes or no)
+
+23) romantic - with a romantic relationship (binary: yes or no)
+
+24) famrel - quality of family relationships (numeric: from 1 - very bad to 5 - excellent)
+
+25) freetime - free time after school (numeric: from 1 - very low to 5 - very high)
+
+26) goout - going out with friends (numeric: from 1 - very low to 5 - very high)
+
+27) Dalc - workday alcohol consumption (numeric: from 1 - very low to 5 - very high)
+
+28) Walc - weekend alcohol consumption (numeric: from 1 - very low to 5 - very high)
+
+29) health - current health status (numeric: from 1 - very bad to 5 - very good)
+
+30) absences - number of school absences (numeric: from 0 to 93)
+
+
+The grades in the Math subject :-
+
+31) G1 - first period grade (numeric: from 0 to 20)
+
+32) G2 - second period grade (numeric: from 0 to 20)
+
+33) G3 - final grade (numeric: from 0 to 20, output target)
+
+
+
+```{r}
+library(gtsummary)
+library(GGally)
+library(ggplot2)
+```
+
+1) gtsummary package :- 
+
+  • This package is used to display the descriptive statistics for (continuous, categorical, and dichotomous) variables in a beautiful way which is easy to understand and infer from.
+
+  • The function tbl_summary() of this package is used for achieving above desired results.
+
+  • It prints the count of each value in each column and its percentage of occurrence out of the total number of rows
+
+
+
+2) GGally package :-
+
+  • This package is used to plot clean pair-wise scatter plots using ggpairs() function.
+
+
+```{r}
+citation("gtsummary")
+```
+
+```{r}
+citation("GGally")
+```
+
+*********************************************************************************************************************
+
+## Part 1: Analysis
+
+#### A] Pre-processing / Data Cleaning :- 
+
+```{r}
+# loading/importing the dataset of students studying math subject
+
+maths_course_student <- data.frame(read.csv(file = "/Users/vivekbulani/Documents/UCD Sem 1 Modules/UCD R Module/Final Project/student-mat.csv", header = TRUE))
+```
+
+
+```{r}
+# print the number of rows in the dataset
+
+print(paste("Number of rows are" , nrow(maths_course_student)))
+```
+
+
+```{r}
+# print the number of columns in the dataset
+
+print(paste("Number of columns are" , ncol(maths_course_student)))
+```
+
+
+```{r}
+# print the structure of the dataset. It tells the datatype of each column along with some of its initial row values.
+
+print("Structure of the Data set is")
+cat("\n")
+str(maths_course_student)
+```
+
+
+```{r}
+# top 6 rows of the Data set are
+
+head(maths_course_student)
+```
+
+```{r}
+# print out all the column names present in the data
+
+print("The different columns present in the Data set are")
+cat("\n")
+colnames(maths_course_student)
+```
+
+
+As for some columns, the column names and values within columns are not proper and not giving proper information, lets rename some columns and also replace values within columns with more meaningful ones.
+
+
+
+```{r}
+# replacing the short form of school names in the "school" column with their full names
+
+maths_course_student$school[maths_course_student$school == 'GP'] <- 'Gabriel Pereira'
+maths_course_student$school[maths_course_student$school == 'MS'] <- 'Mousinho da Silveira'
+```
+
+```{r}
+# replacing the short form of gender in the "sex" column with their full names
+
+maths_course_student$sex[maths_course_student$sex == 'M'] <- 'male'
+maths_course_student$sex[maths_course_student$sex == 'F'] <- 'female'
+```
+
+```{r}
+# replacing the short form of area type in the "address" column with their full names
+
+maths_course_student$address[maths_course_student$address == 'U'] <- 'urban'
+maths_course_student$address[maths_course_student$address == 'R'] <- 'rural'
+```
+
+```{r}
+# replacing the short form of family size description in the "famsize" column with their full names
+
+maths_course_student$famsize[maths_course_student$famsize == 'LE3'] <- 'less or equal to 3'
+maths_course_student$famsize[maths_course_student$famsize == 'GT3'] <- 'greater than 3'
+```
+
+```{r}
+# replacing the short form of status of parents in the "Pstatus" column with their full names
+
+maths_course_student$Pstatus[maths_course_student$Pstatus == 'T'] <- 'living together'
+maths_course_student$Pstatus[maths_course_student$Pstatus == 'A'] <- 'apart'
+```
+
+```{r}
+# converting "Medu" column to an ordered factor with the labels as mentioned in description of dataset at the top.
+# the order is "none < 4th grade < 5th to 9th grade < secondary education < higher education"
+
+maths_course_student$Medu = factor(maths_course_student$Medu, levels=c(0,1,2,3,4), labels=c("none","4th grade","5th to 9th grade","secondary education","higher education"), ordered=TRUE)
+```
+
+```{r}
+# converting "Fedu" column to an ordered factor with the labels as mentioned in description of dataset at the top.
+# the order is "none < 4th grade < 5th to 9th grade < secondary education < higher education"
+
+maths_course_student$Fedu = factor(maths_course_student$Fedu, levels=c(0,1,2,3,4), labels=c("none","4th grade","5th to 9th grade","secondary education","higher education"), ordered=TRUE)
+```
+
+```{r}
+# converting "traveltime" column to an ordered factor with the labels as mentioned in description of dataset at the top.
+# the order is "less than 15 min < 15 to 30 min < 30 min to 1 hour < more than 1 hour"
+
+maths_course_student$traveltime = factor(maths_course_student$traveltime, levels=c(1,2,3,4), labels=c("less than 15 min","15 to 30 min","30 min to 1 hour","more than 1 hour"), ordered=TRUE)
+```
+
+```{r}
+# converting "studytime" column to an ordered factor with the labels as mentioned in description of dataset at the top.
+# the order is "less than 2 hours < 2 to 5 hours < 5 to 10 hours < more than 10 hours"
+
+maths_course_student$studytime = factor(maths_course_student$studytime, levels=c(1,2,3,4), labels=c("less than 2 hours","2 to 5 hours","5 to 10 hours","more than 10 hours"), ordered=TRUE)
+```
+
+```{r}
+# converting "famrel" column to an ordered factor with the labels as mentioned in description of dataset at the top.
+# the order is "very bad < bad < neutral < good < excellent"
+
+maths_course_student$famrel = factor(maths_course_student$famrel, levels=c(1,2,3,4,5), labels=c("very bad","bad","neutral","good","excellent"), ordered=TRUE)
+```
+
+```{r}
+# converting "freetime" column to an ordered factor with the labels as mentioned in description of dataset at the top.
+# the order is "very low < low < medium < high < very high"
+
+maths_course_student$freetime = factor(maths_course_student$freetime, levels=c(1,2,3,4,5), labels=c("very low","low","medium","high","very high"), ordered=TRUE)
+```
+
+```{r}
+# converting "goout" column to an ordered factor with the labels as mentioned in description of dataset at the top.
+# the order is "very low < low < medium < high < very high"
+
+maths_course_student$goout = factor(maths_course_student$goout, levels=c(1,2,3,4,5), labels=c("very low","low","medium","high","very high"), ordered=TRUE)
+```
+
+```{r}
+# converting "Dalc" column to an ordered factor with the labels as mentioned in description of dataset at the top.
+# the order is "very low < low < medium < high < very high"
+
+maths_course_student$Dalc = factor(maths_course_student$Dalc, levels=c(1,2,3,4,5), labels=c("very low","low","medium","high","very high"), ordered=TRUE)
+```
+
+```{r}
+# converting "Walc" column to an ordered factor with the labels as mentioned in description of dataset at the top.
+# the order is "very low < low < medium < high < very high"
+
+maths_course_student$Walc = factor(maths_course_student$Walc, levels=c(1,2,3,4,5), labels=c("very low","low","medium","high","very high"), ordered=TRUE)
+```
+
+```{r}
+# converting "health" column to an ordered factor with the labels as mentioned in description of dataset at the top.
+# the order is "very bad < bad < neutral < good < very good"
+
+maths_course_student$health = factor(maths_course_student$health, levels=c(1,2,3,4,5), labels=c("very bad","bad","neutral","good","very good"), ordered=TRUE)
+```
+
+```{r}
+# renaming the short column names with their full names(description)
+
+names(maths_course_student)[names(maths_course_student) == "G1"] <- "First Period Grade"
+names(maths_course_student)[names(maths_course_student) == "G2"] <- "Second Period Grade"
+names(maths_course_student)[names(maths_course_student) == "G3"] <- "Final Grade"
+```
+
+
+
+```{r}
+# print the structure of the dataset after converting all column names and values to proper meaningful/structured names and datatypes.
+
+str(maths_course_student)
+```
+
+
+
+```{r}
+# find if there are any missing/na values in the dataset
+
+sum(is.na(maths_course_student))
+```
+
+Hence there are no missing values in dataset. So no pre-processing related to handling of missing data is needed here.
+
+
+
+
+```{r}
+# find if there are any duplicate rows in dataset
+
+maths_course_student[duplicated(maths_course_student)==TRUE , ]
+```
+
+As there are 0 rows in the output, it means there are no duplicate rows present in the dataset. So no pre-processing related to removal of duplicate rows is needed here.
+
+
+
+
+#### B] Analysing the cleaned and structured data :- 
+
+
+```{r}
+# display the descriptive statistics for (continuous, categorical, and dichotomous) variables in a more meaningful way
+
+tbl_summary(maths_course_student)
+```
+
+
+
+Using this output, now we can get the different values in each column and their proportion in respective columns of dataset. Some inferences are as follows :-
+
+1) The most common age in the dataset is 15-18 years old (each having more than 20% proportion).
+
+2) Most of the students involved in the survey are from Urban area (approximately 80%).
+
+3) Most of the students have their parents living together (90% of cases).
+
+4) Highest proportion of Mother Education Status is for "Higher Education" category (33%), whereas for Father Education Status, it is "5th to 9th Grade" category which has highest proportion (29%).
+
+5) More than half of the students (approximately 70%) have guardian as their Mother.
+
+6) Most of the students (approximately 80$) have never failed in their previous classes.
+
+7) Most of the students (approximately 80$) have attended their nursery school.
+
+8) 95% students want to pursue higher education.
+
+
+
+These values can also be obtained by using prop.table() function as follows :-
+
+```{r}
+# getting proportion values(fractional values) from the table for school variable
+
+prop_school = prop.table(table(maths_course_student$school))
+
+print(paste("The proportion of students who study at Gabriel Pereira are", round(prop_school['Gabriel Pereira'], 2)))
+print(paste("The proportion of students who study at Mousinho da Silveira are", round(prop_school['Mousinho da Silveira'], 2)))
+```
+
+Hence there are very high number of students from "Gabriel Pereira" as compared to "Mousinho da Silveira".
+
+
+
+```{r}
+# getting proportion values(fractional values) from the table for Dalc variable which represents workday alcohol consumption
+
+prop_Dalc = prop.table(table(maths_course_student$Dalc))
+
+print(paste("The proportion of students who consume very low amount of alcohol on workdays are", round(prop_Dalc['very low'], 2)))
+print(paste("The proportion of students who consume low amount of alcohol on workdays are", round(prop_Dalc['low'], 2)))
+print(paste("The proportion of students who consume neutral/medium amount of alcohol on workdays are", round(prop_Dalc['medium'], 2)))
+print(paste("The proportion of students who consume high amount of alcohol on workdays are", round(prop_Dalc['high'], 2)))
+print(paste("The proportion of students who consume very high amount of alcohol on workdays are", round(prop_Dalc['very high'],2)))
+```
+
+Hence most of the students consume very low alcohol on weekdays.
+
+
+
+
+```{r}
+# getting proportion values(fractional values) from the table for Walc variable which represents weekend alcohol consumption
+
+prop_Walc = prop.table(table(maths_course_student$Walc))
+
+print(paste("The proportion of students who consume very low amount of alcohol on weekends are", round(prop_Walc['very low'], 2)))
+print(paste("The proportion of students who consume low amount of alcohol on weekends are", round(prop_Walc['low'], 2)))
+print(paste("The proportion of students who consume neutral/medium amount of alcohol on weekends are", round(prop_Walc['medium'], 2)))
+print(paste("The proportion of students who consume high amount of alcohol on weekends are", round(prop_Walc['high'], 2)))
+print(paste("The proportion of students who consume very high amount of alcohol on weekends are", round(prop_Walc['very high'],2)))
+```
+
+
+
+If we compare the alcohol consumption levels on weekdays and weekends, we see that at a broader level, students consume more amount of alcohol on weekends than weekdays (Because for weekends, the proportion of higher alcohol consumption levels is much more than the corresponding values for weekdays).
+
+
+
+
+```{r}
+print(paste("The correlation between number of absences and Final Grades is",round(cor(maths_course_student$absences, maths_course_student$`Final Grade`),3)))
+```
+
+
+
+
+#### C] Graphical plots and summaries :- 
+
+```{r}
+# barplot for Dalc (workday alcohol consumption) column
+
+ggplot(maths_course_student, aes(x = Dalc, fill = Dalc)) +
+  geom_bar(width = 0.5) + 
+  xlab("Workday Alcohol Consumption") + ylab("Frequency count") + ggtitle("Frequency Bar Plot For Dalc Column") + 
+  theme(
+    plot.title = element_text(color="red", size=14, face="bold.italic", hjust = 0.5),
+    axis.text = element_text(size=10),
+    axis.title.x = element_text(color="#993333", size=14, face="bold"),
+    axis.title.y = element_text(color="#993333", size=14, face="bold")
+    ) +
+  scale_fill_brewer(palette="GnBu")
+```
+
+
+
+Thus we see that during Workdays, the alcohol consumption level is mostly very low (approximate count for very low category is 270 out of 395 records).
+
+
+
+
+```{r}
+# barplot for Walc (weekend alcohol consumption) column
+
+ggplot(maths_course_student, aes(x = Walc, fill = Walc)) +
+  geom_bar(width = 0.5) + 
+  xlab("Weekend Alcohol Consumption") + ylab("Frequency count") + ggtitle("Frequency Bar Plot For Walc Column") + 
+  theme(
+    plot.title = element_text(color="red", size=14, face="bold.italic", hjust = 0.5),
+    axis.text = element_text(size=10),
+    axis.title.x = element_text(color="#993333", size=14, face="bold"),
+    axis.title.y = element_text(color="#993333", size=14, face="bold")
+    ) +
+  scale_fill_brewer(palette="GnBu")
+```
+
+
+
+Thus we see that during Weekends, the alcohol consumption levels are more as compared to weekdays, because the count for low, medium and high amount of alcohol consumption is more on weekends than on weekdays.
+
+
+
+
+
+```{r}
+# boxplot for Health column
+# x-axis is different categories of health and y-axis is distribution of Final Grade for each category of health
+
+ggplot(maths_course_student, aes(x = health, y = `Final Grade`)) +
+   geom_boxplot(fill = 'lightblue') +
+  xlab("Health of Student") + ylab("Final Grade") + ggtitle("Boxplot for Final Grades vs Health") +
+  theme(
+    plot.title = element_text(color="red", size=14, face="bold.italic", hjust = 0.5),
+    axis.text = element_text(size=10),
+    axis.title.x = element_text(color="#993333", size=14, face="bold"),
+    axis.title.y = element_text(color="#993333", size=14, face="bold")
+    )
+```
+
+
+
+1) Here we see that when the health of a student is very bad, then its Final Grades are, on an average, higher to those students whose health is better. But this seems to be strange and not logical. Maybe there might be some mistake while data collection / data entry. This aspect needs to be further investigated and verified and appropriate reasoning for such behavior needs to be found out if this data is correct.
+
+2) There is high variation in Final Grades for those students whose health is "bad" and very low variation in Final Grades for those whose health is neutral.
+
+3) Also there are a very few outliers almost in all categories.
+
+4) Apart from this, we can infer that except for neutral condition of health, for all other categories of health, the final grades have a skewed distribution.
+
+
+
+
+
+```{r}
+# scatter plot of Number of Absences
+
+plot(maths_course_student$absences , col = 3 , pch = 16, ylab = "Number of School Absences", main = "Scatter Plot of Number of School Absences", col.main = "red", col.lab = "#993333", font.lab = 2)
+```
+
+
+From above scatter plot, we can say that most of the students have 0-10 absences in school. But there are also a few outliers which show that 3 students have more that 50 absences. Hence it needs to be rechecked if this data is correct or not. If it is correct then we need to check the Final Grades of such students as follows :- 
+
+
+
+```{r}
+# finding out the final grades of students who have absences exceptionally large (>50)
+
+print(paste("The Final grades of students who have absences greater than 50 are",maths_course_student$`Final Grade`[maths_course_student$absences > 50]))
+```
+
+These grades are out of 20. Hence all these 3 students are still pass even after being absent for so many days.
+
+
+
+
+
+
+```{r}
+# scatter plots of First and Second Period Grades and Final Grades
+
+
+plot(maths_course_student$`Final Grade` , col = 3 , pch = 16, ylab = "First Period/Second Period/Final Grades", main = "Scatter Plot of Final Grades, First and Second Period Grades", col.main = "red", col.lab = "#993333", font.lab = 2)
+
+points(maths_course_student$`First Period Grade` , col = 6, pch = 17)
+points(maths_course_student$`Second Period Grade` , col = 7 , pch = 18)
+
+legend("bottomleft", c("Final Grades", "First Period Grades", "Second Period Grades"), cex=0.7, col=c(3,6,7), pch=c(16,17,18), title = "Types of Grades")
+
+```
+
+
+
+From above scatter plot, we can infer that for all students, First Period Grades are never 0 (i.e First Period Grades > 0 for all students), whereas Second Period and Final Grades are 0 for few students.
+
+
+
+
+```{r}
+# pair-wise scatter plot for first period grades, second period grades and final grades
+
+ggpairs(maths_course_student[31:33])
+```
+
+
+
+From above plot, we can infer that Final Grades has a high positive correlation with both First and Second Period Grades individually. Also this relationship appears to be linear (i.e as First / Second Period Grades increases, Final Grades increases for most of the students). This relationship can also be shown as follows :- 
+
+
+
+
+```{r}
+# showing and plotting the linear relationship between First Period Grades and Final Grades
+
+ggplot(maths_course_student, aes(x=`First Period Grade` , y=`Final Grade`)) + 
+  geom_point()+
+  geom_smooth(method=lm)
+```
+
+
+
+```{r}
+# showing and plotting the linear relationship between Second Period Grades and Final Grades
+
+ggplot(maths_course_student, aes(x=`Second Period Grade` , y=`Final Grade`)) + 
+  geom_point()+
+  geom_smooth(method=lm)
+```
+
+
+*********************************************************************************************************************
+
+## Part 2: R Package
+
+For this task, the selected package of interest is "caret" (short form for Classification And REgression Training). Though R has many inbuilt methods for different machine learning algorithms, but it is hard/challenging to remember in exactly which package does each method resides. Also different methods may have very different syntax, thus leading to confusion.
+Such problems further create difficulties in complex work such as hyper-parameter tuning.
+
+All such problems have been solved by the introduction of caret package. The user just calls the functions of caret package, which have almost similar structure/syntax (hence called consistent modeling syntax). The caret internally calls the traditional inbuilt methods of respective machine learning algorithms. Hence with the help of caret, users/developers can now focus on more challenging/complex parts of model building.
+
+
+```{r}
+# import the caret package
+
+library(caret)
+```
+
+```{r}
+citation("caret")
+```
+
+Now one of the methods of caret package is to partition/split the dataset into training and testing data. This is very important to ensure the model doesn't overfit the data and that it predicts well for unseen/testing data.
+
+To partition the data, we have createDataPartition() method which takes the response variable as its first parameter, the proportion of split and whether you want partitioned data in the form of list or not.
+
+```{r}
+# define/partition the data into training and testing data. Partition into 80:20 ratio.
+
+partitioned_data <- createDataPartition(maths_course_student$`Final Grade`, p=0.8, list=FALSE)
+training_data <- maths_course_student[partitioned_data, ]
+testing_data <- maths_course_student[-partitioned_data, ]
+```
+
+
+
+
+Another major benefit of caret is that for training any machine learning model, we have the same train() method. Just change the value of parameter "method" to specify which algorithm you need to use. This train() function returns a "train" object which has many different attributes as shown below.
+
+
+#### A] Linear Regression using Caret
+
+
+```{r}
+# train a linear regression model (to predict Final Grades from few predictor variables/columns which seem to be relevant and important) by specifying method="lm". Internally caret calls the traditional lm() method defined in stats package
+
+caret_linear_regression <- train(`Final Grade` ~ `school` + `sex` +  `age` +  `traveltime` +  `studytime` +  `failures` +  `activities` +  `freetime` + `absences` + `First Period Grade` + `Second Period Grade`, data = training_data, method = "lm")
+```
+
+```{r}
+# check the class of linear regression model built using caret package
+
+class(caret_linear_regression)
+```
+
+```{r}
+# find out all the attributes available for train object
+
+attributes(caret_linear_regression)
+```
+
+```{r}
+# check out the results obtained from linear regression model
+
+caret_linear_regression$results
+```
+
+
+
+"finalModel" attribute prints out the details/summary of the final one model which is the best. As linear regression has only 1 model in the result, the same model is considered as the final model.
+
+```{r}
+caret_linear_regression$finalModel
+```
+
+So from above output, we can find the estimated values of all coefficients (intercept and slope parameters).
+
+If we cross check the values of coefficients derived using caret package with those obtained in Part 3 (below), we see that coefficients are similar (close to each other) in both cases.
+
+
+
+#### B] Resampling using Caret
+
+```{r}
+# extract the R-squared value for the model
+
+print(paste("The R-squared value for Linear Regression using Caret is", summary(caret_linear_regression$finalModel)$r.squared))
+```
+
+
+But this R-squared value is when modelling is done on entire dataset. This may give false interpretation because this value is not the true measure of how well the model will perform for new unseen data. The real measure of the quality of model is obtained by the R-squared value of model based on resampling/splitting of data. To extract this R-squared value, use following code :-
+
+
+```{r}
+caret_linear_regression
+```
+
+
+Here we see that R-squared value is approximately 82%. This is the true measure of quality of model because here we see that resampling (Bootstrap resampling) has been performed consisting of 25 repetitions/iterations. This means caret builds 25 models and calculates R-squared value for each model. At last it again runs the model having highest R-squared value and stores this model as Final Model (which can then be displayed using finalModel attribute as seen above.)
+
+
+
+If we want to use Cross-validation instead of Bootstrap, then we can do as follows :- 
+
+```{r}
+# setting up a 10-fold cross validation
+
+ten_fold_cv <- trainControl(method = "cv", number = 10)
+
+
+# train the linear regression model using 10-fold cross validation
+
+caret_linear_regression_cv <- train(`Final Grade` ~ `school` + `sex` +  `age` +  `traveltime` +  `studytime` +  `failures` +  `activities` +  `freetime` + `absences` + `First Period Grade` + `Second Period Grade`, data=training_data, method = "lm", trControl = ten_fold_cv) 
+```
+
+
+```{r}
+# printing out the trained model. Here we can also see for R-squared value (which is based on 10-fold cross validation)
+
+caret_linear_regression_cv
+```
+
+10-fold cross validation means splitting the data into 10 approximately equal chunks. Then develop a model based on 9 chunks and predict the 10th. Perform this multiple times each time choosing a different set of 9 chunks and predict the 10th.
+
+We can see that we get higher R-squared value and lower RMSE value when we use 10-fold cross validation instead of Bootstrap.
+
+
+
+#### C] Random Forest using Caret
+
+
+As said before, the same train() method can be used to build different machine learning models, just update the "method" parameter. So for random forest, we pass "rf" to the "method" attribute to specify that we need to build a random forest.
+
+```{r}
+caret_random_forest <- train(`Final Grade` ~ `school` + `sex` +  `age` +  `traveltime` +  `studytime` +  `failures` +  `activities` +  `freetime` + `absences` + `First Period Grade` + `Second Period Grade`, data = training_data, method = "rf")
+```
+
+
+```{r}
+# check out the results obtained from random forest model
+
+caret_random_forest$results
+```
+
+
+The idea behind random forest is that it creates multiple decision trees and then averages them to give the final prediction. In this case the tuning parameter is the number of randomly selected predictors used to make the trees different (i.e to help create uncorrelated trees). This parameter is called "mtry" in caret. 
+
+Caret automatically performs auto-tuning of "mtry" parameter and builds a model for each of this parameter value using resampling (Bootstrap resampling by default).
+
+Hence we get 3 different model summaries contrary to linear regression where we were getting only 1 model as output.
+
+
+
+If we want to specify the values of mtry that the model should consider, then we can do this using tuneGrid parameter as follows :-
+
+```{r}
+# create a sequence of values to be considered for mtry parameter
+mtry_value_list <- data.frame(mtry = seq(2, 20, by= 4))
+
+
+caret_random_forest_1 <- train(`Final Grade` ~ `school` + `sex` +  `age` +  `traveltime` +  `studytime` +  `failures` +  `activities` +  `freetime` + `absences` + `First Period Grade` + `Second Period Grade`, data = training_data, method = "rf", tuneGrid = mtry_value_list)
+```
+
+
+```{r}
+# get the summary of each random forest model built using specified values of mtry
+
+caret_random_forest_1$results
+```
+
+
+
+
+
+#### D] Comparison of different models using Caret
+
+Another useful tool of caret is that we can easily compare different models built using caret and hence decide which model/algorithm works best for the specified data.
+
+
+```{r}
+model_list <- list(lm = caret_linear_regression, rf = caret_random_forest)
+results_of_2_models <- resamples(model_list)
+summary(results_of_2_models)
+```
+
+
+Hence we clearly see that Random Forest has much higher R-squared value and much lower RMSE (Root Mean Squared Error) value as compared to that of Linear Regression. Thus Random Forest is much better than Linear Regression for our dataset.
+
+
+
+*********************************************************************************************************************
+
+
+## Part 3: Functions/Programming
+
+
+```{r}
+# define a function that creates the list of standardized residuals from the linear model object passed as parameter. It also assigns the object (storing standardized residuals) the appropriate class
+
+get_standardised_residuals <- function(my_mod){               # my_mod is the linear model object
+  my_model_residuals <- rstandard(my_mod)                     # find standardized residuals
+  class(my_model_residuals) <- "my_resid"                     # assign the class
+  return(my_model_residuals)
+}
+```
+
+
+```{r}
+# train a linear regression model with predictor/independent variables as few columns of dataset which seem to be important and relevant to the Final Grades. The response/dependent variable is "Final Grades"
+
+my_model <- lm(`Final Grade` ~ `school` + `sex` +  `age` +  `traveltime` +  `studytime` +  `failures` +  `activities` +  `freetime` + `absences` + `First Period Grade` + `Second Period Grade`, data = maths_course_student)
+```
+
+
+```{r}
+# print out the summary of linear model trained
+
+summary(my_model)
+```
+
+
+From this output we see that age, traveltime, absences, First Period Grades and Second Period Grades are significant (because their p-values are less than 0.05)
+
+
+
+```{r}
+# call the function created above and passing our trained linear model object as parameter
+
+obj <- get_standardised_residuals(my_model)
+```
+
+
+```{r}
+# check the class of obj (object storing standardized residuals)
+
+class(obj)
+```
+
+
+```{r}
+# check the available/defined methods for class "my_resid"
+
+methods(class="my_resid")
+```
+As we haven't declared any methods for this class as of now, hence output shown is "no methods found"
+
+
+
+
+```{r}
+# define a "summary" method for class "my_resid". It returns values of few statistical parameters (such as mean, median, minimum, maximum) of the standardized residuals.
+
+
+summary.my_resid <- function(object){
+  cat("The mean of standardised residuals is", mean(object))
+  cat("\nThe median of standardised residuals is", median(object))
+  cat("\nThe minimum of standardised residuals is", min(object))
+  cat("\nThe maximum of standardised residuals is", max(object))
+}
+```
+
+
+```{r}
+# call the above defined summary object
+
+summary(obj)
+```
+
+
+
+```{r}
+# define the "print" method for class "my_resid". It sorts the residuals in decreasing order and prints the top 10 and bottom 10 residuals. This maybe useful to find out extreme values of residuals (worst prediction cases)
+
+
+print.my_resid <- function(object){
+  object = sort(object, decreasing = TRUE)
+  print(object[1:10])                 # print top 10 residuals (highest positive value of residuals)
+  print(object[386:395])              # print bottom 10 residuals (highest negative value of residuals)
+}
+```
+
+
+```{r}
+# call the above defined print object
+
+print(obj)
+```
+
+
+
+
+```{r}
+# define the "plot" method for class "my_resid". It plots the residuals with respect to some predictor variables (the ones for which p-values are less than 0.05 i.e the ones which are significant) and with respect to response variable (Final Grade). Such plots are useful for determining the usefulness of trained linear models and testing the assumptions of zero conditional mean, homoscedasticity for the linear model.
+
+
+plot.my_resid <- function(object){
+  
+  plot(maths_course_student$age, object, xlab = "Age", ylab = "Residuals", main = "Plot of Residuals vs Age Predictor", col = 2, col.main = 3, col.lab = 4, col.axis = 4)
+  
+  plot(maths_course_student$traveltime, object, xlab = "Travel Time", ylab = "Residuals", main = "Plot of Residuals vs Travel Time Predictor", col = 2, col.main = 3, col.lab = 4, col.axis = 4)
+  
+  plot(maths_course_student$absences, object, xlab = "Absences", ylab = "Residuals", main = "Plot of Residuals vs Absences Predictor", col = 2, col.main = 3, col.lab = 4, col.axis = 4)
+  
+  plot(maths_course_student$`First Period Grade`, object, xlab = "First Period Grade", ylab = "Residuals", main = "Plot of Residuals vs First Period Grade Predictor", col = 2, col.main = 3, col.lab = 4, col.axis = 4)
+  
+  plot(maths_course_student$`Second Period Grade`, object, xlab = "Second Period Grade", ylab = "Residuals", main = "Plot of Residuals vs Second Period Grade Predictor", col = 2, col.main = 3, col.lab = 4, col.axis = 4)
+  
+  plot(maths_course_student$`Final Grade`, object, xlab = "Final Grade", ylab = "Residuals", main = "Plot of Residuals vs Final Grade Response", col = 2, col.main = 3, col.lab = 4, col.axis = 4)
+}
+```
+
+
+```{r}
+# call the above defined plot object
+
+plot(obj)
+```
+
+Here we can see that for most of the predictor variables considered, the residuals are randomly distributed and more concentrated near 0. But for residuals vs response variable, there is some deviation for the values for Final Grade = 0.
+
+
+
+```{r}
+# again check the available/defined methods for class "my_resid"
+
+methods(class="my_resid")
+```
+
+Hence we get the 3 defined methods (plot, print, summary) for class "my_resid"
+
